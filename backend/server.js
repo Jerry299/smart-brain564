@@ -3,6 +3,20 @@ const app = express();
 const bcrypt = require("bcrypt-nodejs");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const knex = require("knex");
+
+const db = knex({
+  client: "pg",
+  connection: {
+    host: "127.0.0.1",
+    user: "postgres",
+    password: "test",
+    database: "smart-brain"
+  }
+});
+db.select("*")
+  .from("users")
+  .then(data => console.log(data));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -32,12 +46,13 @@ const database = {
     email: "endurance@gmail.com"
   }
 };
+
 app.get("/", (req, res) => {
   res.send(database.users);
 });
 //sign In
 app.post("/signin", (req, res) => {
-  /*  bcrypt.compare(
+  /* bcrypt.compare(
     "Stingon",
     "$2a$10$UWGW/mzPFvmY7XVZqXa2Q.vGtHnO07.ksYmaBe1ENNdM2l7q1wI2m",
     function(err, res) {
@@ -51,8 +66,8 @@ app.post("/signin", (req, res) => {
     function(err, res) {
       // res = false
       console.log(res);
-    }
-  ); */
+    } 
+  );*/
   if (
     req.body.email === database.users[0].email &&
     req.body.password === database.users[0].password
@@ -69,9 +84,22 @@ app.post("/register", (req, res) => {
   /* bcrypt.hash(password, null, null, function(err, hash) {
     // Store hash in your password DB.
     console.log(hash);
-  }); */
-
-  database.users.push({
+  });
+ */
+  //insert a new user to the postgresql db
+  db("users")
+    .returning("*")
+    .insert({
+      name: name,
+      email: email,
+      joined: new Date()
+    })
+    .then(data => console.log(data))
+    .then(user => {
+      res.json(user);
+    })
+    .catch(err => res.status(400).json(err.details));
+  /* database.users.push({
     id: "445",
     name: name,
     email: email,
@@ -79,7 +107,7 @@ app.post("/register", (req, res) => {
     joined: new Date()
   });
 
-  res.json(database.users[database.users.length - 1]);
+  res.json(database.users[database.users.length - 1]);*/
 });
 
 // route for specific users
