@@ -14,9 +14,7 @@ const db = knex({
     database: "smart-brain"
   }
 });
-db.select("*")
-  .from("users")
-  .then(data => console.log(data));
+db.select("*").from("users");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -81,54 +79,68 @@ app.post("/signin", (req, res) => {
 //register
 app.post("/register", (req, res) => {
   const { name, email, password } = req.body;
-  /* bcrypt.hash(password, null, null, function(err, hash) {
-    // Store hash in your password DB.
-    console.log(hash);
-  });
- */
+  const hash = bcrypt.hashSync(password);
   //insert a new user to the postgresql db
-  db("users")
-    .returning("*")
-    .insert({
-      name: name,
-      email: email,
-      joined: new Date()
-    })
-    .then(data => console.log(data))
-    .then(user => {
-      res.json(user);
-    })
-    .catch(err => res.status(400).json(err.details));
-  /* database.users.push({
-    id: "445",
-    name: name,
-    email: email,
-    entries: 0,
-    joined: new Date()
-  });
-
-  res.json(database.users[database.users.length - 1]);*/
+  //using knex transactions
+  db.transaction(trx => {
+    trx
+      .insert({
+        hash: hash,
+        email: email
+      })
+      .into("login")
+      .returning("email")
+      .then(loginEmail => {
+        return trx("users")
+          .returning("*")
+          .insert({
+            name: name,
+            email: loginEmail[0].toLowerCase(),
+            joined: new Date()
+          })
+          .then(user => {
+            console.log(user);
+            res.json(user[0]);
+          });
+      })
+      .then(trx.commit)
+      .catch(trx.rollback);
+  }).catch(err => res.status(400).json("Unable to Register"));
 });
 
 // route for specific users
 app.get("/profile/:id", (req, res) => {
   const { id } = req.params;
-  let found = false;
-  database.users.map(user => {
-    found = true;
-    if (user.id === id) {
-      return res.json(user.name);
-    }
-  });
-  if (!found) {
-    res.status(404).json("Not Found");
-  }
+  db("users")
+    .where("id", id)
+    .then(user => {
+      console.log(user, "user");
+      if (user.length) {
+        res.json(user[0]);
+      } else {
+        res.status(400).json("Not Found");
+      }
+    })
+    .catch(err => console.log("error getting user", err));
 });
 //updating image
 //my path = C:\Program Files\PostgreSQL\11\bin
 //old path just if things do not work = %SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Brackets\command;C:\Program Files\Microsoft VS Code\bin;C:\Program Files\nodejs\
 app.put("/image", (req, res) => {
   const { id } = req.body;
+  db("users")
+    .where("id", "=", id)
+    .increment({
+      entries: 1
+    })
+    .returning("entries")
+    .then(entry => {
+      res.json(entry[0]);
+    })
+    .catch(err => {
+      res.status(400).json("unable to update entries");
+    });
+  /* 
   let found = false;
   database.users.map(user => {
     if (user.id === id) {
@@ -139,7 +151,7 @@ app.put("/image", (req, res) => {
   });
   if (!found) {
     return res.status(400).json("Not Found");
-  }
+  } */
 });
 
 app.listen(3000, () => {
