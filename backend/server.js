@@ -46,34 +46,37 @@ const database = {
 };
 
 app.get("/", (req, res) => {
-  res.send(database.users);
+  db.select("*")
+    .from("login")
+    .then(data => {
+      console.log("data", data);
+      return res.json(data);
+    });
 });
 //sign In
 app.post("/signin", (req, res) => {
-  /* bcrypt.compare(
-    "Stingon",
-    "$2a$10$UWGW/mzPFvmY7XVZqXa2Q.vGtHnO07.ksYmaBe1ENNdM2l7q1wI2m",
-    function(err, res) {
-      // res == true
-      console.log(res);
-    }
-  );
-  bcrypt.compare(
-    "veggies",
-    "$2a$10$UWGW/mzPFvmY7XVZqXa2Q.vGtHnO07.ksYmaBe1ENNdM2l7q1wI2m",
-    function(err, res) {
-      // res = false
-      console.log(res);
-    } 
-  );*/
-  if (
-    req.body.email === database.users[0].email &&
-    req.body.password === database.users[0].password
-  ) {
-    res.json(database.users[0]);
-  } else {
-    res.status(400).json("Email Or Password not correct");
-  }
+  const { email, password } = req.body;
+  db.select("email", "hash")
+    .from("login")
+    .where("email", "=", email)
+    .then(data => {
+      const isValid = bcrypt.compareSync(password, data[0].hash);
+      console.log(isValid);
+      console.log(data);
+      if (isValid) {
+        db.select("*")
+          .from("users")
+          .where("email", "=", email)
+          .then(user => {
+            console.log("user", user[0]);
+            res.json(user[0]);
+          })
+          .catch(err => res.status(400).json("Unable to Sign In"));
+      } else {
+        res.status(400).json("Wrong email or password");
+      }
+    })
+    .catch(err => res.status(400).json("Wrong credentials"));
 });
 
 //register
@@ -105,7 +108,10 @@ app.post("/register", (req, res) => {
       })
       .then(trx.commit)
       .catch(trx.rollback);
-  }).catch(err => res.status(400).json("Unable to Register"));
+  }).catch(err => {
+    console.log(err);
+    res.status(400).json("Unable to Register");
+  });
 });
 
 // route for specific users

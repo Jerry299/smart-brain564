@@ -27,11 +27,13 @@ class SingIn extends Component {
     })
       .then(res => res.json())
       .then(user => {
+        console.log(user, "user");
         if (user.id) {
           this.props.loadUser(user);
           this.props.onRouteChange("home");
         }
-      });
+      })
+      .catch(err => console.error(err));
   };
 
   render() {
