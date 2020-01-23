@@ -1,11 +1,13 @@
 import React, { Component } from "react";
+import ErrorMessage from "../ErrorMeassage/ErrorMessage";
 
 class SingIn extends Component {
   constructor(props) {
     super(props);
     this.state = {
       signInEmail: "",
-      signInPassword: ""
+      signInPassword: "",
+      errorLogin: "Welcome To Smart Brain"
     };
   }
 
@@ -13,11 +15,22 @@ class SingIn extends Component {
     this.setState({ signInEmail: event.target.value });
   };
 
+  theFetcherUrl = () => {
+    console.log("https://sleepy-beyond-74213.herokuapp.com/signin");
+  };
+
   onPasswordChange = event => {
     this.setState({ signInPassword: event.target.value });
   };
+  onLoginSuccess = () => {
+    return (
+      <div class="alert alert-success" role="alert">
+        Success
+      </div>
+    );
+  };
   onSubmitSignIn = () => {
-    fetch("https://sleepy-beyond-74213.herokuapp.com/signin", {
+    fetch("http://localhost:3000/signin", {
       method: "post",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -27,9 +40,12 @@ class SingIn extends Component {
     })
       .then(res => res.json())
       .then(user => {
+        //console.log(user);
+        this.setState({ errorLogin: user });
         if (user.id) {
           this.props.loadUser(user);
           this.props.onRouteChange("home");
+          this.onLoginSuccess();
         }
       })
       .catch(err => console.error(err));
@@ -38,6 +54,7 @@ class SingIn extends Component {
   render() {
     return (
       <div>
+        <ErrorMessage error={this.state.errorLogin} />
         <article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l shadow-5 mw6 center">
           <main className="pa4 black-80 ">
             <div className="measure ">

@@ -9,6 +9,7 @@ class Register extends Component {
       password: ""
     };
   }
+
   onNameChange = event => {
     this.setState({ name: event.target.value });
   };
