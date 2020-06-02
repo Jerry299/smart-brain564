@@ -1,0 +1,41 @@
+.toggle-button {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 24px;
+  border: none;
+  background: transparent;
+}
+
+.toggle-button:focus {
+  outline: none;
+}
+.toggle-button__line {
+  background: #fff;
+  width: 25px;
+  height: 2px;
+}
+.side-drawer {
+  height: 20%;
+  background: linear-gradient(89deg, #9ce6ee 0%, #4eeba2 70%);
+  position: fixed;
+  top: 67px;
+  left: 0;
+  box-shadow: 1px 0px 7px rgba(0, 0, 0, 0.5);
+  border-radius: 0 20px 20px 0px;
+  transform: translateX(-10%);
+  transition: transform 1s ease-out;
+}
+.side-drawer ul li {
+  list-style: none;
+  font-size: 22px;
+  font-family: Poppins, "sans-serif";
+  margin: 1.1rem 0;
+}
+.side-drawer ul {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}

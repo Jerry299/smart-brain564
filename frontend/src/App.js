@@ -4,6 +4,7 @@ import Logo from "./components/Logo/Logo";
 import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
 import Rank from "./components/Rank/Rank";
 import Particles from "react-particles-js";
+import SideDrawer from "./components/Navigation/SideDrawer/SideDrawer";
 
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
 import SignIn from "./components/SignIn/SingIn";
@@ -17,10 +18,10 @@ const particlesOptions = {
       value: 25,
       density: {
         enable: true,
-        value_area: 100
-      }
-    }
-  }
+        value_area: 100,
+      },
+    },
+  },
 };
 
 //initial state
@@ -35,8 +36,9 @@ const initialState = {
     name: "",
     email: "",
     entries: 0,
-    joined: ""
-  }
+    joined: "",
+  },
+  sideDrawOpen: false,
 };
 
 class App extends Component {
@@ -45,7 +47,7 @@ class App extends Component {
     this.state = initialState;
   }
 
-  calculateFaceLocation = data => {
+  calculateFaceLocation = (data) => {
     const clarifaiData =
       data.outputs[0].data.regions[0].region_info.bounding_box;
     const image = document.getElementById("image");
@@ -55,60 +57,60 @@ class App extends Component {
       leftCol: clarifaiData.left_col * width,
       topRow: clarifaiData.top_row * height,
       rightCol: width - clarifaiData.right_col * width,
-      bottomRow: height - clarifaiData.bottom_row * height
+      bottomRow: height - clarifaiData.bottom_row * height,
     };
   };
 
-  loadUser = data => {
+  loadUser = (data) => {
     this.setState({
       user: {
         id: data.id,
         name: data.name,
         email: data.email,
         entries: data.entries,
-        joined: data.joined
-      }
+        joined: data.joined,
+      },
     });
   };
 
-  displayFaceBox = box => {
+  displayFaceBox = (box) => {
     this.setState({ box });
   };
-  onPictureSubmit = e => {
+  onPictureSubmit = (e) => {
     this.setState({ imageUrl: this.state.input });
     fetch("https://sleepy-beyond-74213.herokuapp.com/imageURL", {
       method: "post",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        input: this.state.input
-      })
+        input: this.state.input,
+      }),
     })
-      .then(res => res.json())
-      .then(response => {
+      .then((res) => res.json())
+      .then((response) => {
         // do something with response
         if (response) {
           fetch("https://sleepy-beyond-74213.herokuapp.com/image", {
             method: "put",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              id: this.state.user.id
-            })
+              id: this.state.user.id,
+            }),
           })
-            .then(res => res.json())
-            .then(count => {
+            .then((res) => res.json())
+            .then((count) => {
               this.setState(Object.assign(this.state.user, { entries: count }));
             })
             .catch(console.error);
         }
         this.displayFaceBox(this.calculateFaceLocation(response));
       })
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
   };
-  onInputChange = e => {
+  onInputChange = (e) => {
     this.setState({ input: e.target.value });
   };
 
-  onRouteChange = route => {
+  onRouteChange = (route) => {
     if (route === "signout") {
       this.setState(initialState);
     } else if (route === "home") {
@@ -116,15 +118,23 @@ class App extends Component {
     }
     this.setState({ route: route });
   };
+  //for toggler
+  drawerToggleHandler = () => {
+    this.setState((prevState) => {
+      return { sideDrawOpen: !prevState.sideDrawOpen };
+    });
+  };
 
   render() {
     return (
-      <div className="App">
+      <div className="App" style={{ height: "100%" }}>
         <Particles className="particles" params={particlesOptions} />
         <Navigation
           isSignedIn={this.state.isSignedIn}
           onRouteChange={this.onRouteChange}
+          drawClickHandler={this.drawerToggleHandler}
         />
+        {this.state.sideDrawOpen && <SideDrawer />}
         {this.state.route === "home" ? (
           <div>
             <Logo />

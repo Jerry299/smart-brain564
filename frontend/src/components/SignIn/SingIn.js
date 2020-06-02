@@ -32,7 +32,7 @@ const SingIn = (props) => {
   };
 
   const onSubmitSignIn = () => {
-    /* fetch("http://localhost:3000/signin", {
+    fetch("http://localhost:5000/signin", {
       method: "post",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -42,16 +42,16 @@ const SingIn = (props) => {
     })
       .then((res) => res.json())
       .then((user) => {
-        //console.log(user);
-        this.setState({ errorLogin: user });
+        console.log(user);
+
         if (user.id) {
           props.loadUser(user);
           props.onRouteChange("home");
         }
       })
-      .catch((err) => console.error(err)); */
+      .catch((err) => console.error(err));
 
-    axios
+    /* axios
       .post("http://localhost:5000/signin", {
         email: email,
         password: password,
@@ -66,7 +66,7 @@ const SingIn = (props) => {
       })
       .catch((err) => {
         console.log(err);
-      });
+      }); */
   };
 
   return (

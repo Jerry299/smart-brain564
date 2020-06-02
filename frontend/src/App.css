@@ -23,44 +23,6 @@
     height: 100vh;
   }
 } */
-@media screen and (max-width: 767px) {
-  body {
-    overflow-x: hidden;
-    width: 100vw;
-  }
-  .nav-links {
-    position: absolute;
-    right: 0px;
-    top: 8vh;
-    height: 30vh;
-    background-color: #0e4b52;
-    width: 50%;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    border-radius: 50px 0px 0px 50px;
-    transform: translateX(100%);
-    transition: 0.5s ease-in;
-  }
-  .nav-links li {
-    opacity: 0.5;
-  }
-  .burger {
-    display: block;
-  }
-}
-.nav-active {
-  transform: translateX(0%);
-}
 
-@keyframes navLinkFade {
-  from {
-    opacity: 0;
-    transform: translateX(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0px);
-  }
+@media (min-width: 481px) and (max-width: 767px) {
 }
